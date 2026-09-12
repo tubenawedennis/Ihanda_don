@@ -216,9 +216,11 @@ function switchTier(tier, btn) {
   renderTicket();
 }
 
-function renderTicket() {
-  let count = currentTier === 'odd2' ? 2 : currentTier === 'odd3' ? 3 : 4;
-  let picks = dailyMatches.slice(0, count);
+function renderTicket() {// Shift starting fixture so each odd tier picks entirely distinct teams
+let offset = currentTier === 'odd2' ? 0 : currentTier === 'odd3' ? 2 : 0;
+let count = currentTier === 'odd2' ? 2 : currentTier === 'odd3' ? 3 : 4;
+let picks = dailyMatches.slice(offset, offset + count);
+;
   
   currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
   
