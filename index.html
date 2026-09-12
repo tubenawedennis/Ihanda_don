@@ -216,14 +216,29 @@ function switchTier(tier, btn) {
   renderTicket();
 }
 
-function renderTicket() {// Shift starting fixture so each odd tier picks entirely distinct teams
-let offset = currentTier === 'odd2' ? 0 : currentTier === 'odd3' ? 2 : 0;
-let count = currentTier === 'odd2' ? 2 : currentTier === 'odd3' ? 3 : 4;
-let picks = dailyMatches.slice(offset, offset + count);
-;
-  
+function renderTicket() {
+  let picks = [];
+
+  // Each tier pulls from a completely distinct segment of dailyMatches so no teams overlap
+  if (currentTier === 'odd2') {
+    // Takes Match #1 and Match #2
+    picks = dailyMatches.slice(0, 2); 
+  } else if (currentTier === 'odd3') {
+    // Takes Match #3, Match #4, and Match #5
+    picks = dailyMatches.slice(2, 5); 
+  } else if (currentTier === 'odd5') {
+    // Takes Match #6, Match #7, Match #8, and Match #9
+    picks = dailyMatches.slice(5, 9); 
+  }
+
+  // Fallback if the API returns fewer total matches on a quiet matchday
+  if (!picks.length || picks.length < 2) {
+    picks = dailyMatches.slice(0, currentTier === 'odd2' ? 2 : currentTier === 'odd3' ? 3 : 4);
+  }
+
+  // Calculate dynamic total odds
   currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
-  
+
   document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
   document.getElementById('ticket-label').textContent = `${currentTier.toUpperCase()} Ticket (${today})`;
   document.getElementById('booking-code').textContent = `PAWA-${Math.floor(1000 + Math.random() * 9000)}-UG`;
@@ -240,6 +255,13 @@ let picks = dailyMatches.slice(offset, offset + count);
   `).join('');
 
   calculatePayout();
+}
+
+  
+  currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
+  
+  document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
+  document.getElementById('ticket-label').textContent = `${currentTier.toUpperCa;
 }
 
 function calculatePayout() {
