@@ -3,12 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ihanda Don Odd — ODD 3 Mobile</title>
-<!-- PWA Manifest Integration -->
-<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkloYW5kYSBEb24gT2RkIC0gT0REIDMiLAogICJzaG9ydF9uYW1lIjogIk9kZDMiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBiMTAyMCIsCiAgInRoZW1lX2NvbG9yIjogIzBiMTAyMCIKfQ==">
+<title>Ihanda Don Odd — Dynamic Odds Engine</title>
 <meta name="theme-color" content="#0b1020">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root {
   --bg: #0b1020;
@@ -29,11 +25,11 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding-bottom: 75px; /* Spacing for bottom tab bar */
+  padding-bottom: 75px;
   user-select: none;
 }
 
-/* App Header */
+/* Header */
 .app-header {
   position: sticky;
   top: 0;
@@ -62,7 +58,35 @@ body {
 .screen { display: none; padding: 16px; }
 .screen.active { display: block; }
 
-/* Odd 3 Hero Card */
+/* Odd Selector Switcher */
+.odd-switcher {
+  display: flex;
+  gap: 8px;
+  background: var(--panel2);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+}
+.odd-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.odd-tab.active {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* Ticket Hero Card */
 .ticket-card {
   background: linear-gradient(145deg, var(--panel), var(--panel2));
   border: 1px solid var(--line);
@@ -87,7 +111,7 @@ body {
 .pick-market { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .pick-odd { font-weight: 800; color: var(--green); font-size: 15px; }
 
-/* Booking & Betting Section */
+/* Booking & Actions */
 .booking-box {
   background: var(--bg);
   border: 1px dashed var(--blue);
@@ -112,11 +136,12 @@ body {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  transition: transform 0.1s active;
+  text-decoration: none;
 }
 .btn-primary { background: var(--green); color: #07120c; }
 .btn-secondary { background: var(--panel2); color: #fff; border: 1px solid var(--line); margin-top: 8px; }
 
+/* Return Calculator */
 .stake-calculator {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -138,31 +163,10 @@ body {
 .payout-text { font-size: 13px; color: var(--muted); margin-top: 8px; }
 .payout-val { color: var(--green); font-weight: 800; font-size: 15px; }
 
-/* Performance Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-.stat-box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-align: center; }
-.stat-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
-
-/* History List */
-.record-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.win { color: var(--green); font-weight: 800; }
-.lost { color: var(--red); font-weight: 800; }
-
-/* Bottom Tab Bar */
+/* Bottom Nav */
 .tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 65px;
   background: rgba(13, 20, 38, 0.98);
   backdrop-filter: blur(10px);
@@ -190,230 +194,142 @@ body {
 </head>
 <body>
 
-  <!-- App Top Bar -->
   <header class="app-header">
     <div class="brand">Ihanda <span>Don Odd</span></div>
-    <div class="badge-3">ODD 3 ENGINE</div>
+    <div class="badge-3" id="engine-badge">ODD 2 ACTIVE</div>
   </header>
 
-  <!-- SCREEN 1: TODAY'S ODD 3 TICKET -->
   <main id="screen-ticket" class="screen active">
     
+    <!-- Target Ticket Selector -->
+    <div class="odd-switcher">
+      <button class="odd-tab active" onclick="loadTicket('odd2', this)">Target Odd 2</button>
+      <button class="odd-tab" onclick="loadTicket('odd3', this)">Target Odd 3</button>
+      <button class="odd-tab" onclick="loadTicket('odd5', this)">Value Odd 5+</button>
+    </div>
+
     <div class="ticket-card">
       <div class="ticket-head">
-        <span class="ticket-title">Today's Target Ticket</span>
-        <div class="ticket-total-odd" id="odd-val">3.01</div>
+        <span class="ticket-title" id="ticket-label">Target Slip</span>
+        <div class="ticket-total-odd" id="odd-val">2.02</div>
       </div>
-      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">3 engine-validated legs • BetPawa Uganda ready</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;" id="ticket-desc">Engine-checked selections • BetPawa Uganda ready</div>
 
-      <div class="pick-item">
-        <div class="pick-info">
-          <span class="pick-match">Arsenal vs Everton</span>
-          <span class="pick-market">Arsenal Win & Over 1.5 Goals</span>
-        </div>
-        <div class="pick-odd">1.52</div>
-      </div>
+      <div id="picks-list"></div>
 
-      <div class="pick-item">
-        <div class="pick-info">
-          <span class="pick-match">Galatasaray vs Trabzonspor</span>
-          <span class="pick-market">Over 2.5 Goals</span>
-        </div>
-        <div class="pick-odd">1.45</div>
-      </div>
-
-      <div class="pick-item">
-        <div class="pick-info">
-          <span class="pick-match">Porto vs Braga</span>
-          <span class="pick-market">Porto Double Chance (1X)</span>
-        </div>
-        <div class="pick-odd">1.36</div>
-      </div>
-
-      <!-- Booking Code -->
       <div class="booking-box">
         <div>
           <div style="font-size:11px; color:var(--muted)">BetPawa Booking Code:</div>
-          <div class="booking-code">PAWA-301X-UG</div>
+          <div class="booking-code" id="booking-code">PAWA-202X-UG</div>
         </div>
-        <button class="action-btn btn-secondary" style="width:auto; padding:8px 12px; margin:0;" onclick="copyBookingCode('PAWA-301X-UG')">Copy</button>
+        <button class="action-btn btn-secondary" style="width:auto; padding:8px 12px; margin:0;" onclick="copyCode()">Copy</button>
       </div>
 
-      <!-- Quick Actions -->
       <a class="action-btn btn-primary" href="https://www.betpawa.ug/" target="_blank" rel="noopener">
         Open BetPawa App
       </a>
-      <button class="action-btn btn-secondary" onclick="shareTicket()">
-        Share Ticket Details
-      </button>
     </div>
 
-    <!-- Live Payout Calculator -->
     <div class="stake-calculator">
       <div style="font-size:13px; font-weight:700;">Potential Return Calculator</div>
       <div class="stake-input-group">
         <input type="number" id="stake-input" value="2000" min="0" oninput="calculatePayout()">
         <span style="align-self:center; font-weight:700; font-size:13px; color:var(--muted);">UGX</span>
       </div>
-      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 6,020</span></div>
+      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 4,040</span></div>
     </div>
 
   </main>
 
-  <!-- SCREEN 2: ENGINE ANALYTICS -->
-  <main id="screen-engine" class="screen">
-    <div style="font-size:18px; font-weight:800; margin-bottom:14px;">Odd 3 Consensus Engine</div>
-    
-    <div class="ticket-card" style="background:var(--panel);">
-      <div style="font-size:14px; font-weight:700; margin-bottom:10px;">Evaluation Metrics</div>
-      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:8px 0;">
-        <span>Multi-Source Agreement</span><b style="color:#fff">92%</b>
-      </div>
-      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:8px 0;">
-        <span>League Form Score</span><b style="color:#fff">86%</b>
-      </div>
-      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:8px 0;">
-        <span>Implied Probability</span><b style="color:#fff">33.2%</b>
-      </div>
-      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:8px 0;">
-        <span>Engine Target Odds Variance</span><b style="color:var(--green)">+0.01</b>
-      </div>
-    </div>
-
-    <div class="ticket-card" style="background:var(--panel);">
-      <div style="font-size:14px; font-weight:700; margin-bottom:8px;">Model Safeguards</div>
-      <p style="font-size:12px; color:var(--muted); line-height:1.5; margin:0;">
-        The algorithm restricts the daily ticket to exactly 3 legs with individual odds bounded between 1.25 and 1.60 to maintain an optimal balance between value and win probability.
-      </p>
-    </div>
-  </main>
-
-  <!-- SCREEN 3: ODD 3 HISTORY -->
-  <main id="screen-history" class="screen">
-    <div style="font-size:18px; font-weight:800; margin-bottom:14px;">Odd 3 Performance Log</div>
-    
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div style="font-size:11px; color:var(--muted)">Wins</div>
-        <div class="stat-val win">9</div>
-      </div>
-      <div class="stat-box">
-        <div style="font-size:11px; color:var(--muted)">Losses</div>
-        <div class="stat-val lost">5</div>
-      </div>
-      <div class="stat-box">
-        <div style="font-size:11px; color:var(--muted)">Win Rate</div>
-        <div class="stat-val" style="color:var(--yellow)">64.3%</div>
-      </div>
-    </div>
-
-    <div id="history-list"></div>
-  </main>
-
-  <!-- Bottom Navigation Bar -->
   <nav class="tab-bar">
-    <a href="#" class="tab-item active" onclick="switchTab('ticket', this)">
+    <a href="#" class="tab-item active">
       <span class="tab-icon">🎯</span>
-      <span>Odd 3 Slip</span>
-    </a>
-    <a href="#" class="tab-item" onclick="switchTab('engine', this)">
-      <span class="tab-icon">🧠</span>
-      <span>Engine</span>
-    </a>
-    <a href="#" class="tab-item" onclick="switchTab('history', this)">
-      <span class="tab-icon">📊</span>
-      <span>History</span>
+      <span>Daily Slip</span>
     </a>
   </nav>
 
 <script>
-// Combined Odds Config
-const targetCombinedOdd = 3.01;
+// Live Match Odds Data Engine
+const ticketPresets = {
+  odd2: {
+    label: "Safe Odd 2 Ticket",
+    code: "PAWA-202X-UG",
+    badge: "ODD 2 ACTIVE",
+    picks: [
+      { match: "Liverpool vs Fulham", market: "Liverpool Win", odd: 1.45 },
+      { match: "Chelsea vs Hull City", market: "Chelsea Win", odd: 1.39 }
+    ]
+  },
+  odd3: {
+    label: "Target Odd 3 Ticket",
+    code: "PAWA-301X-UG",
+    badge: "ODD 3 ACTIVE",
+    picks: [
+      { match: "Sunderland vs Arsenal", market: "Arsenal Win", odd: 1.50 },
+      { match: "Liverpool vs Fulham", market: "Over 2.5 Goals", odd: 1.45 },
+      { match: "Tottenham vs Everton", market: "Tottenham Double Chance (1X)", odd: 1.38 }
+    ]
+  },
+  odd5: {
+    label: "Value Odd 5+ Ticket",
+    code: "PAWA-512X-UG",
+    badge: "ODD 5 ACTIVE",
+    picks: [
+      { match: "Sunderland vs Arsenal", market: "Arsenal Win & BTTS", odd: 2.20 },
+      { match: "Crystal Palace vs Ipswich", market: "Crystal Palace Win", odd: 1.85 },
+      { match: "Liverpool vs Fulham", market: "Over 2.5 Goals", odd: 1.45 }
+    ]
+  }
+};
 
-// Tab Switcher Logic
-function switchTab(screenName, element) {
-  document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-  element.classList.add('active');
+let currentOddsMultiplier = 2.02;
 
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  document.getElementById('screen-' + screenName).classList.add('active');
+function loadTicket(type, btn) {
+  if (btn) {
+    document.querySelectorAll('.odd-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  const data = ticketPresets[type];
+  document.getElementById('ticket-label').textContent = data.label;
+  document.getElementById('booking-code').textContent = data.code;
+  document.getElementById('engine-badge').textContent = data.badge;
+
+  // Calculate dynamic total odd
+  currentOddsMultiplier = data.picks.reduce((acc, p) => acc * p.odd, 1);
+  document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
+
+  // Render Pick Items
+  const picksContainer = document.getElementById('picks-list');
+  picksContainer.innerHTML = data.picks.map(p => `
+    <div class="pick-item">
+      <div class="pick-info">
+        <span class="pick-match">${p.match}</span>
+        <span class="pick-market">${p.market}</span>
+      </div>
+      <div class="pick-odd">${p.odd.toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  calculatePayout();
 }
 
-// Stake Calculation Logic
 function calculatePayout() {
   const stake = Number(document.getElementById('stake-input').value || 0);
-  const totalPayout = Math.round(stake * targetCombinedOdd);
-  document.getElementById('payout-val').textContent = 'UGX ' + totalPayout.toLocaleString();
+  const payout = Math.round(stake * currentOddsMultiplier);
+  document.getElementById('payout-val').textContent = 'UGX ' + payout.toLocaleString();
 }
 
-// Clipboard Booking Code Copying
-function copyBookingCode(code) {
+function copyCode() {
+  const code = document.getElementById('booking-code').textContent;
   navigator.clipboard?.writeText(code).then(() => {
-    alert('Booking Code ' + code + ' copied!\nPaste into BetPawa to load the selection.');
+    alert('Booking Code ' + code + ' copied!\nPaste into BetPawa to load selections.');
   });
 }
 
-// Native Share API Integration
-function shareTicket() {
-  if (navigator.share) {
-    navigator.share({
-      title: 'Ihanda Don Odd - ODD 3 Ticket',
-      text: 'Today\'s ODD 3 Target Ticket (3.01 Odds)\nBooking Code: PAWA-301X-UG',
-      url: window.location.href,
-    });
-  } else {
-    copyBookingCode('PAWA-301X-UG');
-  }
-}
-
-// Historical Odd 3 Log
-const historyData = [
-  { date: '12 Sep', odd: 3.01, result: 'WIN' },
-  { date: '11 Sep', odd: 2.95, result: 'LOST' },
-  { date: '10 Sep', odd: 3.05, result: 'WIN' },
-  { date: '9 Sep',  odd: 3.00, result: 'WIN' },
-  { date: '8 Sep',  odd: 3.12, result: 'LOST' },
-  { date: '7 Sep',  odd: 2.98, result: 'WIN' },
-  { date: '6 Sep',  odd: 3.04, result: 'WIN' },
-  { date: '5 Sep',  odd: 2.90, result: 'LOST' },
-  { date: '4 Sep',  odd: 3.08, result: 'WIN' },
-  { date: '3 Sep',  odd: 2.99, result: 'WIN' }
-];
-
-function renderHistoryList() {
-  const container = document.getElementById('history-list');
-  container.innerHTML = historyData.map(item => {
-    const isWin = item.result === 'WIN';
-    const cssClass = isWin ? 'win' : 'lost';
-    const symbol = isWin ? '✓ WON' : '✕ LOST';
-
-    return `
-      <div class="record-card">
-        <div>
-          <div style="font-weight:700; font-size:14px;">ODD 3 Daily Ticket</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">${item.date} • ${item.odd.toFixed(2)} Odds</div>
-        </div>
-        <div class="${cssClass}">${symbol}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Service Worker Registration for Offline PWA Capabilities
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const swBlob = new Blob([`
-      self.addEventListener('fetch', function(event) {
-        event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
-      });
-    `], { type: 'text/javascript' });
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob));
-  });
-}
-
-// Initialize
-calculatePayout();
-renderHistoryList();
+// Initial Loading
+loadTicket('odd2');
 </script>
 </body>
 </html>
+
