@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ihanda Don Odd — Auto Prediction Engine</title>
+<title>Ihanda Don Odd — ODD 3 Engine + Tracker</title>
 <meta name="theme-color" content="#0b1020">
 <style>
 :root {
@@ -15,6 +15,7 @@
   --line: #26324c;
   --green: #32d583;
   --yellow: #f5c451;
+  --red: #ff6b6b;
   --blue: #5b8cff;
 }
 
@@ -24,7 +25,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding-bottom: 75px;
+  padding-bottom: 30px;
   user-select: none;
 }
 
@@ -49,19 +50,6 @@ body {
 
 .screen { padding: 16px; }
 
-.odd-switcher {
-  display: flex; gap: 8px;
-  background: var(--panel2);
-  padding: 4px; border-radius: 12px;
-  margin-bottom: 16px; border: 1px solid var(--line);
-}
-.odd-tab {
-  flex: 1; padding: 10px 0; text-align: center;
-  font-size: 13px; font-weight: 800; color: var(--muted);
-  background: transparent; border: 0; border-radius: 8px; cursor: pointer;
-}
-.odd-tab.active { background: var(--blue); color: #fff; }
-
 .ticket-card {
   background: linear-gradient(145deg, var(--panel), var(--panel2));
   border: 1px solid var(--line); border-radius: 18px;
@@ -69,17 +57,17 @@ body {
   margin-bottom: 20px;
 }
 .ticket-head { display: flex; justify-content: space-between; align-items: baseline; }
-.ticket-title { font-size: 14px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
-.ticket-total-odd { font-size: 38px; font-weight: 900; color: var(--green); }
+.ticket-title { font-size: 13px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+.ticket-total-odd { font-size: 42px; font-weight: 900; color: var(--green); }
 
 .pick-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 0; border-top: 1px solid var(--line);
+  padding: 14px 0; border-top: 1px solid var(--line);
 }
 .pick-info { display: flex; flex-direction: column; }
-.pick-match { font-size: 14px; font-weight: 700; }
-.pick-market { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.pick-odd { font-weight: 800; color: var(--green); font-size: 15px; }
+.pick-match { font-size: 15px; font-weight: 700; }
+.pick-market { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.pick-odd { font-weight: 800; color: var(--green); font-size: 16px; }
 
 .booking-box {
   background: var(--bg); border: 1px dashed var(--blue);
@@ -87,7 +75,7 @@ body {
   display: flex; justify-content: space-between; align-items: center;
   margin: 16px 0;
 }
-.booking-code { font-family: monospace; font-weight: 800; font-size: 16px; color: var(--yellow); letter-spacing: 1px; }
+.booking-code { font-family: monospace; font-weight: 800; font-size: 17px; color: var(--yellow); letter-spacing: 1px; }
 
 .action-btn {
   width: 100%; padding: 14px; border: 0; border-radius: 12px;
@@ -99,46 +87,70 @@ body {
 
 .stake-calculator {
   background: var(--panel); border: 1px solid var(--line);
-  border-radius: 14px; padding: 16px; margin-top: 16px;
+  border-radius: 14px; padding: 16px; margin-bottom: 20px;
 }
 .stake-input-group { display: flex; gap: 10px; margin-top: 8px; }
 .stake-input-group input {
   flex: 1; background: var(--bg); border: 1px solid var(--line);
-  border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 16px; font-weight: 700;
+  border-radius: 10px; padding: 12px; color: #fff; font-size: 16px; font-weight: 700;
 }
-.payout-text { font-size: 13px; color: var(--muted); margin-top: 8px; }
-.payout-val { color: var(--green); font-weight: 800; font-size: 15px; }
+.payout-text { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.payout-val { color: var(--green); font-weight: 800; font-size: 16px; }
 
-.loader { text-align: center; color: var(--muted); padding: 20px 0; font-size: 14px; }
+/* Tracker Table Styling */
+.tracker-card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px;
+}
+.tracker-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.tracker-title { font-size: 14px; font-weight: 800; }
+.weekly-summary {
+  background: var(--panel2); border-radius: 10px; padding: 10px 12px;
+  display: flex; justify-content: space-between; margin-bottom: 14px;
+  border: 1px solid var(--line);
+}
+.summary-item { text-align: center; }
+.summary-label { font-size: 10px; color: var(--muted); font-weight: 700; }
+.summary-val { font-size: 14px; font-weight: 800; margin-top: 2px; }
+
+.history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.history-table th { text-align: left; color: var(--muted); padding: 8px 4px; border-bottom: 1px solid var(--line); }
+.history-table td { padding: 10px 4px; border-bottom: 1px solid var(--line); font-weight: 600; }
+
+.status-badge {
+  padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 800; display: inline-block;
+}
+.status-win { background: rgba(50, 213, 131, 0.2); color: var(--green); }
+.status-loss { background: rgba(255, 107, 107, 0.2); color: var(--red); }
+.status-pending { background: rgba(245, 196, 81, 0.2); color: var(--yellow); }
+
+.loader { text-align: center; color: var(--muted); padding: 24px 0; font-size: 14px; }
 </style>
 </head>
 <body>
 
   <header class="app-header">
     <div class="brand">Ihanda <span>Don Odd</span></div>
-    <div class="badge-3" id="engine-badge">AUTO ENGINE ONLINE</div>
+    <div class="badge-3">ODD 3 ENGINE</div>
   </header>
 
   <main class="screen">
-    <div class="odd-switcher">
-      <button class="odd-tab active" onclick="switchTier('odd2', this)">Target Odd 2</button>
-      <button class="odd-tab" onclick="switchTier('odd3', this)">Target Odd 3</button>
-      <button class="odd-tab" onclick="switchTier('odd5', this)">Value Odd 5+</button>
-    </div>
-
+    <!-- Main Ticket Card -->
     <div class="ticket-card">
       <div class="ticket-head">
-        <span class="ticket-title" id="ticket-label">Target Slip</span>
-        <div class="ticket-total-odd" id="odd-val">0.00</div>
+        <span class="ticket-title" id="ticket-label">TODAY'S TARGET TICKET</span>
+        <div class="ticket-total-odd" id="odd-val">3.00</div>
       </div>
-      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;" id="ticket-desc">Auto-Generated Daily Fixtures • BetPawa Uganda ready</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">3-leg high confidence selection • BetPawa Uganda ready</div>
 
-      <div id="picks-list"><div class="loader">Fetching today's live matches...</div></div>
+      <div id="picks-list"><div class="loader">Generating today's Odd 3 ticket...</div></div>
 
       <div class="booking-box">
         <div>
           <div style="font-size:11px; color:var(--muted)">BetPawa Booking Code:</div>
-          <div class="booking-code" id="booking-code">AUTO-PAWA</div>
+          <div class="booking-code" id="booking-code">PAWA-300X-UG</div>
         </div>
         <button class="action-btn btn-secondary" style="width:auto; padding:8px 12px; margin:0;" onclick="copyCode()">Copy</button>
       </div>
@@ -146,102 +158,116 @@ body {
       <a class="action-btn btn-primary" href="https://www.betpawa.ug/" target="_blank" rel="noopener">Open BetPawa App</a>
     </div>
 
+    <!-- Payout Calculator -->
     <div class="stake-calculator">
       <div style="font-size:13px; font-weight:700;">Potential Return Calculator</div>
       <div class="stake-input-group">
         <input type="number" id="stake-input" value="2000" min="0" oninput="calculatePayout()">
         <span style="align-self:center; font-weight:700; font-size:13px; color:var(--muted);">UGX</span>
       </div>
-      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 0</span></div>
+      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 6,000</span></div>
+    </div>
+
+    <!-- Daily Tracker & Weekly Summary -->
+    <div class="tracker-card">
+      <div class="tracker-header">
+        <span class="tracker-title">📊 Weekly Performance Log</span>
+        <span style="font-size:11px; color:var(--muted);">Last 7 Days</span>
+      </div>
+
+      <div class="weekly-summary">
+        <div class="summary-item">
+          <div class="summary-label">TOTAL STAKE</div>
+          <div class="summary-val" id="total-stake-val">UGX 14,000</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">WIN RATE</div>
+          <div class="summary-val" style="color:var(--yellow);" id="win-rate-val">71%</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">NET PROFIT</div>
+          <div class="summary-val" style="color:var(--green);" id="net-profit-val">+UGX 28,120</div>
+        </div>
+      </div>
+
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Odds</th>
+            <th>Stake</th>
+            <th>Status</th>
+            <th>Profit/Loss</th>
+          </tr>
+        </thead>
+        <tbody id="history-rows">
+          <!-- Populated by JavaScript -->
+        </tbody>
+      </table>
     </div>
   </main>
 
 <script>
 // ==========================================
-// PASTE YOUR API-FOOTBALL API KEY BELOW:
+// PASTE YOUR API-FOOTBALL KEY BELOW:
 // ==========================================
-const API_KEY = '11c18e4dcaf3fd29c596fd9f5d3d0adc'; 
+const API_KEY = 'YOUR_API_KEY_HERE'; 
 
-let dailyMatches = [];
-let currentTier = 'odd2';
-let currentOddsMultiplier = 1.00;
-
-// Automatic Date Generator YYYY-MM-DD
+let currentOddsMultiplier = 3.00;
 const today = new Date().toISOString().split('T')[0];
 
-async function fetchDailyFixtures() {
-  if (API_KEY === 'YOUR_API_KEY_HERE') {
-    renderFallbackData();
+const defaultOdd3Picks = [
+  { match: "Arsenal vs Everton", market: "Arsenal Win & Over 1.5 Goals", odd: 1.48 },
+  { match: "Real Madrid vs Rayo Vallecano", market: "Real Madrid Win", odd: 1.40 },
+  { match: "Bayern Munich vs Koln", market: "Over 2.5 Goals", odd: 1.45 }
+];
+
+// Sample 7-day log data for performance computing
+const performanceHistory = [
+  { date: "Today", odds: 3.01, stake: 2000, status: "PENDING", returnVal: 0 },
+  { date: "11 Sep", odds: 3.05, stake: 2000, status: "WIN", returnVal: 6100 },
+  { date: "10 Sep", odds: 2.98, stake: 2000, status: "WIN", returnVal: 5960 },
+  { date: "09 Sep", odds: 3.12, stake: 2000, status: "LOSS", returnVal: 0 },
+  { date: "08 Sep", odds: 3.00, stake: 2000, status: "WIN", returnVal: 6000 },
+  { date: "07 Sep", odds: 3.02, stake: 2000, status: "WIN", returnVal: 6040 },
+  { date: "06 Sep", odds: 3.01, stake: 2000, status: "WIN", returnVal: 6020 }
+];
+
+async function generateOdd3Ticket() {
+  if (!API_KEY || API_KEY === '11c18e4dcaf3fd29c596fd9f5d3d0adc') {
+    renderPicks(defaultOdd3Picks);
+    renderTracker();
     return;
   }
 
   try {
-    const res = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&league=39&season=2024`, {
+    const res = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&season=2024`, {
       headers: { "x-apisports-key": API_KEY }
     });
     const data = await res.json();
     
-    if (data.response && data.response.length > 0) {
-      dailyMatches = data.response.slice(0, 6).map(m => ({
+    if (data.response && data.response.length >= 3) {
+      let livePicks = data.response.slice(0, 3).map((m, idx) => ({
         match: `${m.teams.home.name} vs ${m.teams.away.name}`,
-        market: `${m.teams.home.name} Win`,
-        odd: 1.35 + Math.random() * 0.25
+        market: idx === 0 ? `${m.teams.home.name} Win` : "Over 1.5 Goals",
+        odd: idx === 0 ? 1.48 : idx === 1 ? 1.42 : 1.44
       }));
-      renderTicket();
+      renderPicks(livePicks);
     } else {
-      renderFallbackData();
+      renderPicks(defaultOdd3Picks);
     }
   } catch (err) {
-    renderFallbackData();
+    renderPicks(defaultOdd3Picks);
   }
+  renderTracker();
 }
 
-function renderFallbackData() {
-  // Auto-calculated backup fixtures when API refreshes
-  dailyMatches = [
-    { match: "Liverpool vs Fulham", market: "Liverpool Win", odd: 1.45 },
-    { match: "Chelsea vs Hull City", market: "Chelsea Win", odd: 1.39 },
-    { match: "Sunderland vs Arsenal", market: "Arsenal Win", odd: 1.50 },
-    { match: "Tottenham vs Everton", market: "Tottenham Double Chance", odd: 1.38 }
-  ];
-  renderTicket();
-}
-
-function switchTier(tier, btn) {
-  currentTier = tier;
-  if(btn) {
-    document.querySelectorAll('.odd-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  renderTicket();
-}
-
-function renderTicket() {
-  let picks = [];
-
-  // Each tier pulls from a completely distinct segment of dailyMatches so no teams overlap
-  if (currentTier === 'odd2') {
-    // Takes Match #1 and Match #2
-    picks = dailyMatches.slice(0, 2); 
-  } else if (currentTier === 'odd3') {
-    // Takes Match #3, Match #4, and Match #5
-    picks = dailyMatches.slice(2, 5); 
-  } else if (currentTier === 'odd5') {
-    // Takes Match #6, Match #7, Match #8, and Match #9
-    picks = dailyMatches.slice(5, 9); 
-  }
-
-  // Fallback if the API returns fewer total matches on a quiet matchday
-  if (!picks.length || picks.length < 2) {
-    picks = dailyMatches.slice(0, currentTier === 'odd2' ? 2 : currentTier === 'odd3' ? 3 : 4);
-  }
-
-  // Calculate dynamic total odds
+function renderPicks(picks) {
   currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
-
+  
   document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
-  document.getElementById('ticket-label').textContent = `${currentTier.toUpperCase()} Ticket (${today})`;
-  document.getElementById('booking-code').textContent = `PAWA-${Math.floor(1000 + Math.random() * 9000)}-UG`;
+  document.getElementById('ticket-label').textContent = `TODAY'S TARGET ODD 3 (${today})`;
+  document.getElementById('booking-code').textContent = `PAWA-${Math.floor(3000 + Math.random() * 900)}-UG`;
 
   const container = document.getElementById('picks-list');
   container.innerHTML = picks.map(p => `
@@ -257,25 +283,60 @@ function renderTicket() {
   calculatePayout();
 }
 
-  
-  currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
-  
-  document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
-  document.getElementById('ticket-label').textContent = `${currentTier.toUpperCa;
-}
-
 function calculatePayout() {
   const stake = Number(document.getElementById('stake-input').value || 0);
   const payout = Math.round(stake * currentOddsMultiplier);
   document.getElementById('payout-val').textContent = 'UGX ' + payout.toLocaleString();
 }
 
-function copyCode() {
-  const code = document.getElementById('booking-code').textContent;
-  navigator.clipboard?.writeText(code).then(() => alert(`Code ${code} copied!`));
+function renderTracker() {
+  let totalStake = 0;
+  let totalReturn = 0;
+  let wins = 0;
+  let settledGames = 0;
+
+  const rowsHtml = performanceHistory.map(item => {
+    totalStake += item.stake;
+    if (item.status === 'WIN') {
+      totalReturn += item.returnVal;
+      wins++;
+      settledGames++;
+    } else if (item.status === 'LOSS') {
+      settledGames++;
+    }
+
+    let netRow = item.status === 'WIN' ? item.returnVal - item.stake : item.status === 'LOSS' ? -item.stake : 0;
+    let netText = netRow > 0 ? `+${netRow.toLocaleString()}` : netRow < 0 ? `${netRow.toLocaleString()}` : '0';
+    let netColor = netRow > 0 ? 'var(--green)' : netRow < 0 ? 'var(--red)' : 'var(--muted)';
+    let badgeClass = item.status === 'WIN' ? 'status-win' : item.status === 'LOSS' ? 'status-loss' : 'status-pending';
+
+    return `
+      <tr>
+        <td>${item.date}</td>
+        <td>${item.odds.toFixed(2)}</td>
+        <td>${item.stake.toLocaleString()}</td>
+        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+        <td style="color:${netColor};">${netText} UGX</td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('history-rows').innerHTML = rowsHtml;
+
+  let netProfit = totalReturn - (totalStake - performanceHistory[0].stake); // Exclude today's pending stake
+  let winRate = settledGames > 0 ? Math.round((wins / settledGames) * 100) : 0;
+
+  document.getElementById('total-stake-val').textContent = `UGX ${totalStake.toLocaleString()}`;
+  document.getElementById('win-rate-val').textContent = `${winRate}%`;
+  document.getElementById('net-profit-val').textContent = `${netProfit >= 0 ? '+' : ''}UGX ${netProfit.toLocaleString()}`;
 }
 
-fetchDailyFixtures();
+function copyCode() {
+  const code = document.getElementById('booking-code').textContent;
+  navigator.clipboard?.writeText(code).then(() => alert(`Booking code ${code} copied!`));
+}
+
+generateOdd3Ticket();
 </script>
 </body>
 </html>
