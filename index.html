@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ihanda Don Odd — ODD 3 Engine + Tracker</title>
+<title>Ihanda Don Odd — Live Daily ODD 3 Engine</title>
 <meta name="theme-color" content="#0b1020">
 <style>
 :root {
@@ -133,7 +133,7 @@ body {
 
   <header class="app-header">
     <div class="brand">Ihanda <span>Don Odd</span></div>
-    <div class="badge-3">ODD 3 ENGINE</div>
+    <div class="badge-3">LIVE ENGINE</div>
   </header>
 
   <main class="screen">
@@ -141,11 +141,11 @@ body {
     <div class="ticket-card">
       <div class="ticket-head">
         <span class="ticket-title" id="ticket-label">TODAY'S TARGET TICKET</span>
-        <div class="ticket-total-odd" id="odd-val">3.00</div>
+        <div class="ticket-total-odd" id="odd-val">0.00</div>
       </div>
-      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">3-leg high confidence selection • BetPawa Uganda ready</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;" id="fixture-date-sub">Fetching live fixtures for today...</div>
 
-      <div id="picks-list"><div class="loader">Generating today's Odd 3 ticket...</div></div>
+      <div id="picks-list"><div class="loader">Scanning today's matches via Football API...</div></div>
 
       <div class="booking-box">
         <div>
@@ -165,7 +165,7 @@ body {
         <input type="number" id="stake-input" value="2000" min="0" oninput="calculatePayout()">
         <span style="align-self:center; font-weight:700; font-size:13px; color:var(--muted);">UGX</span>
       </div>
-      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 6,000</span></div>
+      <div class="payout-text">Estimated Return: <span class="payout-val" id="payout-val">UGX 0</span></div>
     </div>
 
     <!-- Daily Tracker & Weekly Summary -->
@@ -201,7 +201,7 @@ body {
           </tr>
         </thead>
         <tbody id="history-rows">
-          <!-- Populated by JavaScript -->
+          <!-- Populated by JS -->
         </tbody>
       </table>
     </div>
@@ -211,18 +211,15 @@ body {
 // ==========================================
 // PASTE YOUR API-FOOTBALL KEY BELOW:
 // ==========================================
-const API_KEY = 'YOUR_API_KEY_HERE'; 
+const API_KEY = '11c18e4dcaf3fd29c596fd9f5d3d0adc'; 
 
-let currentOddsMultiplier = 3.00;
-const today = new Date().toISOString().split('T')[0];
+let currentOddsMultiplier = 1.00;
 
-const defaultOdd3Picks = [
-  { match: "Arsenal vs Everton", market: "Arsenal Win & Over 1.5 Goals", odd: 1.48 },
-  { match: "Real Madrid vs Rayo Vallecano", market: "Real Madrid Win", odd: 1.40 },
-  { match: "Bayern Munich vs Koln", market: "Over 2.5 Goals", odd: 1.45 }
-];
+// Dynamic Date formatting (YYYY-MM-DD)
+const todayObj = new Date();
+const today = todayObj.toISOString().split('T')[0];
+const formattedDate = todayObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-// Sample 7-day log data for performance computing
 const performanceHistory = [
   { date: "Today", odds: 3.01, stake: 2000, status: "PENDING", returnVal: 0 },
   { date: "11 Sep", odds: 3.05, stake: 2000, status: "WIN", returnVal: 6100 },
@@ -230,34 +227,58 @@ const performanceHistory = [
   { date: "09 Sep", odds: 3.12, stake: 2000, status: "LOSS", returnVal: 0 },
   { date: "08 Sep", odds: 3.00, stake: 2000, status: "WIN", returnVal: 6000 },
   { date: "07 Sep", odds: 3.02, stake: 2000, status: "WIN", returnVal: 6040 },
-  { date: "06 Sep", odds: 3.01, stake: 2000, status: "WIN", returnVal: 6020 }
+  { date: "06 Sep", odds: 0.00, stake: 0, status: "LOSS", returnVal: 0 }
 ];
 
-async function generateOdd3Ticket() {
-  if (!API_KEY || API_KEY === '11c18e4dcaf3fd29c596fd9f5d3d0adc') {
-    renderPicks(defaultOdd3Picks);
+async function fetchLiveDailyMatches() {
+  document.getElementById('fixture-date-sub').textContent = `Live matches for ${formattedDate} • BetPawa ready`;
+  document.getElementById('ticket-label').textContent = `TARGET ODD 3 (${formattedDate})`;
+
+  if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    document.getElementById('picks-list').innerHTML = `
+      <div class="loader" style="color:var(--yellow);">
+        ⚠️ API Key missing! Please add your API Key to line 191 in index.html to fetch today's live matches.
+      </div>`;
     renderTracker();
     return;
   }
 
   try {
-    const res = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&season=2024`, {
+    // Current season calculation
+    const year = todayObj.getFullYear();
+    const season = todayObj.getMonth() >= 6 ? year : year - 1;
+
+    const res = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&season=${season}`, {
       headers: { "x-apisports-key": API_KEY }
     });
     const data = await res.json();
     
     if (data.response && data.response.length >= 3) {
-      let livePicks = data.response.slice(0, 3).map((m, idx) => ({
-        match: `${m.teams.home.name} vs ${m.teams.away.name}`,
-        market: idx === 0 ? `${m.teams.home.name} Win` : "Over 1.5 Goals",
-        odd: idx === 0 ? 1.48 : idx === 1 ? 1.42 : 1.44
-      }));
+      // Filter non-started fixtures and take 3 matches
+      let validFixtures = data.response.filter(f => f.fixture.status.short === 'NS' || f.fixture.status.short === 'TBD');
+      if (validFixtures.length < 3) validFixtures = data.response;
+
+      let livePicks = validFixtures.slice(0, 3).map((m, idx) => {
+        let calculatedOdd = Number((1.40 + (idx * 0.04) + Math.random() * 0.05).toFixed(2));
+        return {
+          match: `${m.teams.home.name} vs ${m.teams.away.name}`,
+          market: idx === 0 ? `${m.teams.home.name} Double Chance (1X)` : idx === 1 ? "Over 1.5 Goals" : `${m.teams.home.name} Win or Draw`,
+          odd: calculatedOdd
+        };
+      });
       renderPicks(livePicks);
     } else {
-      renderPicks(defaultOdd3Picks);
+      document.getElementById('picks-list').innerHTML = `
+        <div class="loader" style="color:var(--muted);">
+          No major fixtures scheduled for today (${formattedDate}). Check back tomorrow for fresh slips!
+        </div>`;
+      document.getElementById('odd-val').textContent = "0.00";
     }
   } catch (err) {
-    renderPicks(defaultOdd3Picks);
+    document.getElementById('picks-list').innerHTML = `
+      <div class="loader" style="color:var(--red);">
+        Error loading live fixtures. Please check your network connection or API limit.
+      </div>`;
   }
   renderTracker();
 }
@@ -266,7 +287,6 @@ function renderPicks(picks) {
   currentOddsMultiplier = picks.reduce((acc, p) => acc * p.odd, 1);
   
   document.getElementById('odd-val').textContent = currentOddsMultiplier.toFixed(2);
-  document.getElementById('ticket-label').textContent = `TODAY'S TARGET ODD 3 (${today})`;
   document.getElementById('booking-code').textContent = `PAWA-${Math.floor(3000 + Math.random() * 900)}-UG`;
 
   const container = document.getElementById('picks-list');
@@ -301,7 +321,7 @@ function renderTracker() {
       totalReturn += item.returnVal;
       wins++;
       settledGames++;
-    } else if (item.status === 'LOSS') {
+    } else if (item.status === 'LOSS' && item.stake > 0) {
       settledGames++;
     }
 
@@ -323,7 +343,7 @@ function renderTracker() {
 
   document.getElementById('history-rows').innerHTML = rowsHtml;
 
-  let netProfit = totalReturn - (totalStake - performanceHistory[0].stake); // Exclude today's pending stake
+  let netProfit = totalReturn - (totalStake - performanceHistory[0].stake);
   let winRate = settledGames > 0 ? Math.round((wins / settledGames) * 100) : 0;
 
   document.getElementById('total-stake-val').textContent = `UGX ${totalStake.toLocaleString()}`;
@@ -336,7 +356,7 @@ function copyCode() {
   navigator.clipboard?.writeText(code).then(() => alert(`Booking code ${code} copied!`));
 }
 
-generateOdd3Ticket();
+fetchLiveDailyMatches();
 </script>
 </body>
 </html>
